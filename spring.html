@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Vibes & Girl Power</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Pacifico&display=swap');
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Весняний градієнт */
+            background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 50%, #ffd3b6 100%);
+            font-family: 'Comfortaa', cursive;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-family: 'Pacifico', cursive;
+            color: #d81b60;
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.7);
+        }
+        
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn {
+            background: white;
+            border: 2px solid #ffaaa5;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            color: #d81b60;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(216, 27, 96, 0.15);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-family: 'Comfortaa', cursive;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(216, 27, 96, 0.3);
+            background: #ffaaa5;
+            color: white;
+        }
+        
+        .game-area {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .card-container {
+            perspective: 1000px;
+            width: 320px;
+            height: 320px;
+            margin-bottom: 25px;
+            cursor: pointer;
+        }
+        
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-front {
+            background: rgba(255, 255, 255, 0.9);
+            flex-direction: column;
+            border: 3px dashed #ffaaa5;
+        }
+        
+        .flower-icon {
+            font-size: 90px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .click-hint {
+            margin-top: 15px;
+            color: #d81b60;
+            font-weight: bold;
+        }
+        
+        .card-back {
+            background: #fff;
+            transform: rotateY(180deg);
+            padding: 25px;
+            text-align: center;
+            border: 4px solid #a8e6cf;
+            box-sizing: border-box;
+            flex-direction: column;
+        }
+        
+        .prediction-text {
+            font-size: 1.2rem;
+            color: #4a4a4a;
+            line-height: 1.6;
+            font-weight: 700;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        /* Пелюстки */
+        
+        .petal {
+            position: absolute;
+            background-color: #ffaaa5;
+            border-radius: 15px 0 15px 0;
+            opacity: 0.8;
+            animation: fall linear forwards;
+            z-index: 1;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="menu" class="menu">
+            <h1>Для кого передбачення?</h1>
+            <button class="btn" onclick="startGame('junior')">Для маленьких фей (1-4 кл) 🧚‍♀️</button>
+            <button class="btn" onclick="startGame('middle')">Для стильних дівчат (5-7 кл) ✨</button>
+            <button class="btn" onclick="startGame('senior')">Для Girl Boss (8-11 кл) 👑</button>
+        </div>
+
+        <div id="gameArea" class="game-area">
+            <h1 style="font-size: 2rem;">Твій весняний вайб:</h1>
+            <div class="card-container" onclick="revealPrediction()">
+                <div class="card" id="card">
+                    <div class="card-face card-front">
+                        <div class="flower-icon">🌷</div>
+                        <div class="click-hint">Зірвати квіточку</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <p class="prediction-text" id="result">...</p>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="resetCard()">Наступна дівчинка 🌸</button>
+            <button class="btn" style="margin-top: 10px; background: transparent; border-color: white; color: #d81b60;" onclick="goBack()">⬅ Змінити клас</button>
+        </div>
+    </div>
+
+    <script>
+        const predictions = {
+            junior: [
+                "Ти справжня чарівниця! Сьогодні твоя усмішка розтопить будь-який лід.",
+                "Навесні твої мрії почнуть здійснюватися. Продовжуй вірити у дива!",
+                "Ти дуже талановита дівчинка. Твої малюнки та ідеї — найкращі!",
+                "Сьогодні ти дізнаєшся щось неймовірно цікаве і розкажеш усім подружкам.",
+                "Ти — наче сонячний промінчик для свого класу. Світи яскраво!",
+                "Твоя суперсила — доброта. Сьогодні вона допоможе тобі знайти нових друзів.",
+                "На тебе чекає солодкий сюрприз та море компліментів!",
+                "Ти дуже розумна і кмітлива. Наступна п'ятірка вже чекає на тебе в щоденнику!",
+                "Весна принесе тобі багато веселих ігор на свіжому повітрі.",
+                "Ти прекрасна, як весняна квіточка. Ніколи не забувай про це!"
+            ],
+            middle: [
+                "Твій стиль просто бездоганний! Хтось сьогодні таємно захоплюватиметься твоїм луком.",
+                "Ти маєш унікальний талант. Цієї весни настав час показати його всім!",
+                "Girl Power — це про тебе! Ти смілива, розумна і можеш досягти чого завгодно.",
+                "Твоя харизма зашкалює. Сьогодні ти будеш зіркою будь-якої компанії!",
+                "Весна готує для тебе круті зміни: нові хобі, нову музику і класні знайомства.",
+                "Твій настрій сьогодні — надихати інших. Поділися своїм позитивом!",
+                "Ти не просто красива, ти — цікава особистість. Розвивай свої суперздібності!",
+                "Удача на твоєму боці. Навіть найскладніша контрольна здасться тобі легкою.",
+                "Твоя щирість притягує крутих людей. Очікуй на класне повідомлення!",
+                "Не бійся бути собою. Твоя унікальність — це твій головний тренд!"
+            ],
+            senior: [
+                "Ти — справжня Girl Boss! Твій розум і впевненість відчинять перед тобою будь-які двері.",
+                "Ця весна — ідеальний час для саморозвитку. Інвестуй час у себе, ти цього варта.",
+                "Твоя краса йде зсередини. Ти надихаєш інших своєю незалежністю.",
+                "Не чекай на диво — створюй його сама. У тебе є для цього все необхідне!",
+                "Хтось захоплюється твоїм інтелектом і почуттям гумору. Продовжуй сяяти!",
+                "Стереотипи не для тебе. Ти руйнуєш рамки і створюєш власні правила гри.",
+                "Твоя інтуїція цієї весни працюватиме на 100%. Довіряй своєму внутрішньому голосу.",
+                "Ти здатна досягти будь-якої мети. Не дозволяй нікому сумніватися у твоїх силах.",
+                "Любов до себе — твій головний пріоритет. Ти прекрасна саме такою, як ти є.",
+                "Твоя енергетика притягує успіх. Готуйся до дуже крутих новин найближчим часом!"
+            ]
+        };
+
+        let currentCategory = 'middle';
+        let isFlipped = false;
+
+        const menuEl = document.getElementById('menu');
+        const gameAreaEl = document.getElementById('gameArea');
+        const cardEl = document.getElementById('card');
+        const resultEl = document.getElementById('result');
+
+        function startGame(category) {
+            currentCategory = category;
+            menuEl.style.display = 'none';
+            gameAreaEl.style.display = 'flex';
+            resetCard();
+        }
+
+        function goBack() {
+            gameAreaEl.style.display = 'none';
+            menuEl.style.display = 'flex';
+            resetCard();
+        }
+
+        function revealPrediction() {
+            if (isFlipped) return;
+
+            const list = predictions[currentCategory];
+            const randomText = list[Math.floor(Math.random() * list.length)];
+
+            resultEl.textContent = randomText;
+            cardEl.classList.add('flipped');
+            isFlipped = true;
+
+            createPetals();
+        }
+
+        function resetCard() {
+            cardEl.classList.remove('flipped');
+            isFlipped = false;
+            setTimeout(() => {
+                if (!isFlipped) resultEl.textContent = "...";
+            }, 300);
+        }
+
+        function createPetals() {
+            const colors = ['#ffaaa5', '#ff9a9e', '#fecfef', '#ffffff'];
+            for (let i = 0; i < 25; i++) {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.top = '-20px';
+                petal.style.width = (Math.random() * 10 + 10) + 'px';
+                petal.style.height = (Math.random() * 10 + 10) + 'px';
+                petal.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                petal.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                document.body.appendChild(petal);
+
+                setTimeout(() => {
+                    petal.remove();
+                }, 4000);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
